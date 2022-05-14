@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+     #container{
+         display: grid;;
+         grid-template-columns: repeat(4,1fr);
+         gap:20px;
+         padding: 20px;
+         width: 90%;
+         margin: auto;
+         /* border: 1px solid black; */
+     }
+     .image{
+         width:100%;
+
+     }
+     .box{
+         padding:10px;
+
+     }
+
+     #selectData{
+         margin-left:600px;
+         width:16vw;
+         text-align: center;
+
+     }
+
+        </style>
+</head>
+<body>
+    
+
+
+<select name="select" id="selectData" >
+    <option value="">Select Category</option>
+    <!-- <option value=""></option> -->
+</select>
+ 
+  <div id="container"></div>
+</body>
+</html>
+<script>
+
+    
+    if(localStorage.getItem("foodData"))
+    {
+       
+       let foodData=JSON.parse(localStorage.getItem("foodData"))
+        displayData(foodData)
+        // console.log(foodData)
+    }else{
+           
+        foodCategory();
+    }
+
+    async function foodCategory()
+    {
+        try{
+            var result=await fetch('https://www.themealdb.com/api/json/v1/1/categories.php')
+            var foodItems=await result.json();
+            // console.log(foodItems)
+            localStorage.setItem("foodData",JSON.stringify(foodItems))
+            displayData(foodItems)
+        }
+        catch(error)
+        {
+            console.log(error)
+        }
+    }
+
+    function displayData(data)
+    {
+    
+     data.categories.forEach(element =>{
+        var option=document.createElement("option");
+        option.setAttribute("value",element.strCategory)
+     option.innerText=element.strCategory;
+     
+     
+    document.querySelector("#selectData").append(option)
+
+
+     })
+    }
+
+     document.querySelector("#selectData").addEventListener("change",()=>{
+        var values=document.querySelector("#selectData").value;
+        console.log(values);
+        foodSelect(values)
+
+     })
+
+
+   
+    async function foodSelect(data)
+    {
+        try{
+            var result=await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${data}`)
+            var Items=await result.json();
+            // console.log(Items)
+            // localStorage.setItem("food",JSON.stringify(Items))
+            display(Items)
+        }
+        catch(error)
+        {
+            console.log(error)
+        }
+    }
+
+    function display(allData)
+    {
+        document.querySelector("#container").innerHTML="";
+      allData.meals.forEach(element =>{
+          var div=document.createElement("div");
+          div.setAttribute("class","box")
+
+
+          var meal=document.createElement("p");
+          meal.innerText=element.strMeal;
+          meal.setAttribute("class","meal")
+
+
+          var img=document.createElement("img");
+          img.src=element.strMealThumb;
+          img.setAttribute("class","image")
+
+          div.append(img,meal);
+          document.querySelector("#container").append(div)
+      })
+    }
+
+</script>
+
